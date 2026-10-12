@@ -1,0 +1,21 @@
+name: Build Brina Project
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Export
+        run: |
+          mkdir -p build
+          godot --headless --export-debug "Android" build/game.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Brina-APK
+          path: build/*.apk
