@@ -5,30 +5,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Unzip project
         run: |
-          unzip -o brina-engine.zip -d.
+          rm -rf temp_unzip
+          unzip -o brina-engine.zip -d temp_unzip
+          PROJECT_DIR=$(find temp_unzip -name "project.godot" -exec dirname {} \; | head -n1)
+          echo "Project at $PROJECT_DIR"
+          cp -r $PROJECT_DIR/..
           ls -la
-          if [ -d "brina-engine" ]; then
-            mv brina-engine/*.
-          fi
+
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v1
         with:
           version: 4.4.0
           use-dotnet: false
           include-templates: true
+
       - name: Import & Export
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/4.4.0.stable
-          wget -q https://github.com/godotengine/godot/releases/download/4.4-stable/Godot_v4.4-stable_export_templates.tpz -O templates.tpz
-          unzip -o templates.tpz -d /tmp
-          mv /tmp/templates/* ~/.local/share/godot/export_templates/4.4.0.stable/ || true
-          godot --headless --import
           mkdir -p build
-          godot --headless --export-release Android build/brina.apk || godot --headless --export Android build/brina.apk
+          godot --headless --import || true
+          godot --headless --export-debug Android build/Brina.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: brina-apk
+          name: Brina-APK
           path: build/*.apk
