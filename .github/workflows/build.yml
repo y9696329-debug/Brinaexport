@@ -11,10 +11,8 @@ jobs:
           unzip -o brina-engine.zip -d temp_unzip
           PROJECT_DIR=$(find temp_unzip -name "project.godot" -exec dirname {} \; | head -n1)
           echo "Project at $PROJECT_DIR"
-          cp -r "$PROJECT_DIR"/*.
-          cp -r "$PROJECT_DIR"/.. 2>/dev/null || true
+          cp -a "$PROJECT_DIR"/..
           ls -la
-          cat project.godot || true
 
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v1
@@ -27,7 +25,7 @@ jobs:
         run: |
           mkdir -p build
           godot --headless --import || true
-          godot --headless --export-debug Android build/Brina.apk || godot --headless --export-release Android build/Brina.apk
+          godot --headless --export-debug Android build/Brina.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
