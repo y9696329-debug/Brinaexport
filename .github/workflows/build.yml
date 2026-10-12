@@ -1,21 +1,34 @@
-name: Build Brina Project
+name: Build Brina APK
 on: [push]
 jobs:
-  build:
+  export:
     runs-on: ubuntu-latest
-    container:
-      image: barichello/godot-ci:4.4
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Export
+      - uses: actions/checkout@v4
+      - name: Unzip project
         run: |
+          unzip -o brina-engine.zip -d.
+          ls -la
+          if [ -d "brina-engine" ]; then
+            mv brina-engine/*.
+          fi
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.4.0
+          use-dotnet: false
+          include-templates: true
+      - name: Import & Export
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/4.4.0.stable
+          wget -q https://github.com/godotengine/godot/releases/download/4.4-stable/Godot_v4.4-stable_export_templates.tpz -O templates.tpz
+          unzip -o templates.tpz -d /tmp
+          mv /tmp/templates/* ~/.local/share/godot/export_templates/4.4.0.stable/ || true
+          godot --headless --import
           mkdir -p build
-          godot --headless --export-debug "Android" build/game.apk
-
+          godot --headless --export-release Android build/brina.apk || godot --headless --export Android build/brina.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Brina-APK
+          name: brina-apk
           path: build/*.apk
